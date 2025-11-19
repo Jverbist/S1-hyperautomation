@@ -1,4 +1,4 @@
-# 🔦 Purple Lamp Hyperautomation Demo  
+# Purple Lamp Hyperautomation Demo  
 SentinelOne → n8n → Raspberry Pi → Relay → Purple Lamp
 
 This guide explains how to build the project yourself from scratch:
