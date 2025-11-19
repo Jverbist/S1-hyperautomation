@@ -1,0 +1,62 @@
+services:
+  traefik:
+    image: traefik
+    restart: always
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.mytlschallenge.acme.httpchallenge=true"
+      - "--certificatesresolvers.mytlschallenge.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.mytlschallenge.acme.email=${SSL_EMAIL}"
+      - "--certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - traefik_data:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    restart: always
+    # Editor only on host localhost (you can reach it via SSH tunnel or on-box browser)
+    ports:
+      - "127.0.0.1:5678:5678"
+    labels:
+      - traefik.enable=true
+
+      # Public: ONLY /webhook (production)
+      - traefik.http.routers.n8n-webhooks.rule=Host(`${SUBDOMAIN}.${DOMAIN_NAME}`) && PathPrefix(`/webhook`)
+      - traefik.http.routers.n8n-webhooks.entrypoints=websecure
+      - traefik.http.routers.n8n-webhooks.tls=true
+      - traefik.http.routers.n8n-webhooks.tls.certresolver=mytlschallenge
+
+      # Public: ONLY /webhook-test (testing)
+      - traefik.http.routers.n8n-webhooks-test.rule=Host(`${SUBDOMAIN}.${DOMAIN_NAME}`) && PathPrefix(`/webhook-test`)
+      - traefik.http.routers.n8n-webhooks-test.entrypoints=websecure
+      - traefik.http.routers.n8n-webhooks-test.tls=true
+      - traefik.http.routers.n8n-webhooks-test.tls.certresolver=mytlschallenge
+
+      # NEW: Editor on n8n.exn.local (LAN DNS only)
+      - traefik.http.routers.n8n-editor.rule=Host(`n8n.exn.local`)
+      - traefik.http.routers.n8n-editor.entrypoints=websecure
+      - traefik.http.routers.n8n-editor.tls=true
+
+      # Tell Traefik the internal port
+      - traefik.http.services.n8n.loadbalancer.server.port=5678
+    environment:
+      - N8N_HOST=${SUBDOMAIN}.${DOMAIN_NAME}
+      - N8N_PROTOCOL=https
+      - N8N_PORT=5678
+      - WEBHOOK_URL=https://${SUBDOMAIN}.${DOMAIN_NAME}
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+      - TZ=${GENERIC_TIMEZONE}
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./local-files:/files
+
+volumes:
+  n8n_data:
+  traefik_data:

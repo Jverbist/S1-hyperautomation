@@ -1,0 +1,101 @@
+{
+  "name": "Purple Lamp – S1 Webhook (off)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crowdstrike/cant/turn/this/lamp/off",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "35661c75-8508-41fb-99bd-6cec8c613820",
+      "name": "Webhook (S1)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        96,
+        96
+      ],
+      "webhookId": "92f0be84-2014-446f-a070-4d1c701997b2",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "hp0XjeCEHHFJ6WPg",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "http://192.168.130.222:8000/lamp/off",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {
+          "redirect": {},
+          "timeout": 10
+        }
+      },
+      "id": "fc7534b3-5ad1-4d53-a974-35f9e4c0631c",
+      "name": "HTTP Request → Lamp (Pi)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        432,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "72b014f1-8050-4302-9f93-18e658eb4e39",
+      "name": "Respond (JSON)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        800,
+        96
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook (S1)": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request → Lamp (Pi)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request → Lamp (Pi)": {
+      "main": [
+        [
+          {
+            "node": "Respond (JSON)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0c38e396-bd7a-4cfb-8ee5-cff65fa9bcd6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c6b2f70fd119eb3d467bce3c2ed68652fb5935ca795e9c246f8bdf7239cf4030"
+  },
+  "id": "deuEYOEFGwJjUvhK",
+  "tags": []
+}
