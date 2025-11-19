@@ -284,7 +284,7 @@ docker compose up -d
 ```
 Check Traefik has a certificate:
 ```bash
-curl -I https://n8n.fake-nmbs.be/webhook-test/healthcheck
+curl -I https://n8n.<domain>/webhook-test/healthcheck
 # Expect HTTP/2 404 (from n8n) once it's up
 ```
 
